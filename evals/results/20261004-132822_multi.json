@@ -1,0 +1,31 @@
+{
+  "multi": {
+    "summary": {
+      "mode": "multi",
+      "cases_passed": "1/1",
+      "routing_accuracy": "1/1",
+      "tool_selection": "1/1",
+      "no_leak": "n/a",
+      "server_refused": "n/a",
+      "total_cost_usd": 0.0167,
+      "avg_latency_ms": 8792
+    },
+    "rows": [
+      {
+        "id": "route-07",
+        "type": "routing",
+        "passed": true,
+        "checks": {
+          "route": true,
+          "tool": true
+        },
+        "answer": "**Globex brief**\n\n**Deal status:** Project Heron is in the pilot phase (last updated Sept 30, 2026).\n\n**Latest meeting (Globex pilot check-in, Sept 30, 2026):**\n- The pilot is in week 2.\n- Adoption is good in Nairobi and weak in Mombasa.\n- Decision: run a refresher session for the Mombasa team next week.\n\n**Open action items:**\n1. Invoice pilot month 1. Owner: Otieno. Due Sept 28, 2026.\n2. Collect pilot feedback survey. Owner: Achieng. Due Oct 12, 2026.\n\n**Overdue:** One item is overdue, and it's the invoice for pilot month 1. Otieno owns it, it was due Sept 28, 2026, and it's still open. The feedback survey isn't overdue yet.\n",
+        "agent_calls": 3,
+        "input_tokens": 7399,
+        "output_tokens": 831,
+        "cost_usd": 0.016655,
+        "latency_ms": 8792
+      }
+    ]
+  }
+}

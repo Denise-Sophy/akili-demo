@@ -1,0 +1,5 @@
+# Only what the MCP server needs (the container images use this; agents use requirements.txt)
+mcp>=2.1,<2.2
+uvicorn
+python-dotenv
+mangum  # AWS Lambda adapter (server/lambda_handler.py)

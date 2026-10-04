@@ -1,0 +1,48 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  security-and-wiring:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - run: pip install -r requirements.txt
+
+      - name: Generate throwaway test tokens for this run
+        run: |
+          python - >> "$GITHUB_ENV" <<'EOF'
+          import json, secrets
+          tokens = {
+              secrets.token_urlsafe(32): {"name": "denise", "role": "lead", "clients": ["*"]},
+              secrets.token_urlsafe(32): {"name": "globex_lead", "role": "client_lead", "clients": ["globex"]},
+              secrets.token_urlsafe(32): {"name": "ops_intern", "role": "ops", "clients": ["acme"]},
+          }
+          print("AKILI_TOKENS=" + json.dumps(tokens))
+          EOF
+
+      - name: Start the MCP server
+        run: |
+          uvicorn server.akili_mcp_server:app --port 8000 &
+          for i in $(seq 1 30); do curl -sf http://localhost:8000/health && exit 0; sleep 1; done
+          echo "server did not start"; exit 1
+
+      # Free, deterministic: auth, scopes, PII masking, memory permissions, audit. No API key needed.
+      - name: Security checks
+        run: python -m evals.security_check
+
+      - name: Agent wiring (no model calls)
+        run: python -m evals.smoke_agents
+
+  docker-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -t akili-mcp .

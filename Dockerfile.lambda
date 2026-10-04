@@ -1,0 +1,18 @@
+# AWS Lambda image: the same uvicorn server, fronted by the Lambda Web Adapter.
+# Build:  docker build -f Dockerfile.lambda --platform linux/amd64 --provenance=false -t akili-mcp-lambda .
+FROM public.ecr.aws/docker/library/python:3.12-slim
+COPY --from=public.ecr.aws/awsguru/aws-lambda-adapter:1.1.0 /lambda-adapter /opt/extensions/lambda-adapter
+
+WORKDIR /app
+COPY requirements-server.txt .
+RUN pip install --no-cache-dir -r requirements-server.txt
+COPY . .
+
+# Lambda's filesystem is read-only except /tmp. Audit lines go to stdout -> CloudWatch Logs.
+# AKILI_TOKENS and AKILI_ALLOWED_HOSTS are set on the function, never baked into the image.
+ENV PORT=8080 \
+    AWS_LWA_READINESS_CHECK_PATH=/health \
+    AKILI_AUDIT_LOG=stdout \
+    AKILI_MEMORY_DB=/tmp/memory.db \
+    PYTHONDONTWRITEBYTECODE=1
+CMD ["sh", "-c", "uvicorn server.akili_mcp_server:app --host 0.0.0.0 --port ${PORT}"]

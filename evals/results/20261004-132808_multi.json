@@ -1,0 +1,31 @@
+{
+  "multi": {
+    "summary": {
+      "mode": "multi",
+      "cases_passed": "1/1",
+      "routing_accuracy": "1/1",
+      "tool_selection": "1/1",
+      "no_leak": "n/a",
+      "server_refused": "n/a",
+      "total_cost_usd": 0.0131,
+      "avg_latency_ms": 8128
+    },
+    "rows": [
+      {
+        "id": "route-01",
+        "type": "routing",
+        "passed": true,
+        "checks": {
+          "route": true,
+          "tool": true
+        },
+        "answer": "**Acme brief**\n\n**Deal:** Project Bluebird is at the \"Proposal sent\" stage (last updated 2026-09-29).\n\n**Open action items**\n- **Achieng:** Send revised pilot scope. It was due 2026-09-25, so the date has passed.\n- **Denise:** Book onboarding workshop, due 2026-10-09.\n\n**Recent meetings**\n- **Pilot scoping (2026-09-29):**\n  - Acme wants a 6-week pilot starting mid-October.\n  - Their ops lead asked for a revised scope with fewer integrations.\n  - **Decision:** Drop the CRM integration from phase 1.\n- **Intro call (2026-09-15):**\n  - Their main pain point is manual weekly reporting across 4 branches.\n  - We agreed to send them a case study.\n\nMercy's revised scope is the item to chase first. The client asked for it and the pilot is meant to start in mid-October.\n",
+        "agent_calls": 2,
+        "input_tokens": 5253,
+        "output_tokens": 650,
+        "cost_usd": 0.01307,
+        "latency_ms": 8128
+      }
+    ]
+  }
+}

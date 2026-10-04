@@ -1,0 +1,6 @@
+﻿mcp>=2.1,<2.2
+strands-agents[anthropic]>=1.0
+uvicorn
+httpx2
+python-dotenv
+gspread  # only needed with AKILI_DATA=sheets
