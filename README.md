@@ -1,12 +1,31 @@
-# Akili: from AI automation to a governed multi-agent system
+# Akili demo: a governed multi-agent AI system
 
-Akili turns meeting summaries into tracked commitments, deal snapshots, and answerable team memory. It runs live for consulting clients at Romel Ventures (Nairobi). This repo is a **sanitised demo**: fictional clients (Acme, Globex, Initech), no client information.
+An MCP server with authentication, access control, audit logging and PII masking, deployed on AWS Lambda, with Claude agents on top and evals that measure whether multi-agent is worth it.
 
-It shows:
+|  |  |
+|---|---|
+| **Built with** | Python · MCP (Python SDK 2.x) · Strands Agents · Claude (Sonnet 5.5, Haiku 4.5) · AWS Lambda · CloudWatch · GitHub Actions |
+| **Status** | MCP server deployed on AWS Lambda; agents run locally against it |
+| **Security** | 13/13 security checks passing against the live deployment; denials verified in CloudWatch |
+| **Key finding** | At 9 tools, a single agent matched multi-agent on accuracy (15/15) and was 17% cheaper and 45% faster, so multi-agent isn't justified yet |
+
+## Why this exists
+
+Production Akili is a set of Python scripts and n8n workflows that the Romel Ventures team (Nairobi) uses in Slack. It routes meeting notes, tracks action items, nudges owners and answers questions. Its question-answering agent lived inside n8n, where it couldn't be tested, permission-scoped or cost-tracked.
+
+This repo is the engineering evolution of that layer:
+1. Pull the agent into code.
+2. Put its data access behind an MCP server that enforces who can see what.
+3. Add audit, PII masking, tracing and cost tracking.
+4. Build evals to measure whether multi-agent orchestration actually helps.
+
+It's a **production-oriented demo, not production itself**. It uses fictional clients (Acme, Globex, Initech), and the gaps to production are listed honestly below. Production Akili is separate and unchanged.
+
+## What it shows
 
 1. **An MCP server** that exposes Akili's data with authentication, role and client scoping, PII masking, and an audit log of every allow and deny.
 2. **An agent harness** (Strands): a coordinator agent that delegates to two specialist agents, each limited to the MCP tools for its job.
-3. **Long-term decision memory**, behind the same security boundary as the data.
+3. **Decision memory**, behind the same security boundary as the data. It's SQLite: persistent locally, reset on Lambda restarts.
 4. **Observability and cost tracking**: every agent step is traced with tokens, latency and USD, and joined to the server's audit log by `trace_id`.
 5. **Evals**: a free deterministic security suite, plus a behavioural suite that compares multi-agent against single-agent on accuracy and cost.
 6. **A reusable agent skill** (`skills/tutorial-generator`).
@@ -107,7 +126,7 @@ Built on the MCP Python SDK 2.x (`MCPServer`, streamable HTTP, stateless) and St
 ## Results
 
 - `evals/security_check.py`: **13/13 against the live AWS Lambda deployment**, with the audit check confirmed in CloudWatch, and **14/14** against the local server (no-token and bad-token 401s, cross-client refusal, role scope refusal, scoped overdue list, PII masking, memory write permissions, deny audit).
-- `evals/run_evals.py`, 15 cases, run 2026-10-04 (raw results in `evals/results/`):
+- `evals/run_evals.py`, 15 cases, run 2026-10-04 (raw results in `evals/results/`; owner first names in the fixtures and saved answers were swapped for fictional ones after the runs):
 
 | | Multi-agent (Sonnet 5.5 coordinator + Haiku 4.5 specialists) | Single agent (Sonnet 5.5, all 9 tools) |
 |---|---|---|
