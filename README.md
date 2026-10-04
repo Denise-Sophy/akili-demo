@@ -71,6 +71,31 @@ python app.py --as globex_lead "Show me Acme's deal stage"   # refused by the se
 python -m evals.run_evals --mode both                # paid: multi vs single agent
 ```
 
+### Deployed on AWS
+
+The MCP server runs on **AWS Lambda** (Python 3.12, eu-west-1) behind a public Function URL:
+
+```bash
+python scripts/build_lambda.py     # Linux zip from the exact versions tested locally, no Docker needed
+python scripts/deploy_lambda.py    # idempotent: role, function, URL, log retention
+AKILI_MCP_URL=https://<function-url>/mcp python -m evals.security_check   # 13/13 live; denials verified in CloudWatch
+```
+
+- **Least-privilege deploy user:** an inline IAM policy scoped to one role, one function and its log group. No admin rights.
+- **Execution role:** basic Lambda logging only.
+- **Auth:** the Function URL is public; the server's own bearer-token check and scopes do the gating.
+- **Secrets:** tokens are Lambda environment variables (KMS-encrypted at rest) and never in the image or repo. Next step: Secrets Manager.
+- **Audit:** audit lines go to CloudWatch Logs with 14-day retention.
+- **Host check:** DNS-rebinding protection stays on, with only the Function URL hostname allowed.
+
+Deployment gotchas found along the way:
+1. **The MCP SDK accepts only `localhost`** by default, so every request to the deployed URL would get `421`. The public hostname is now allowed explicitly.
+2. **The MCP session manager runs once per app**, but the Lambda adapter starts and stops the app on every request, so a fresh app is built per invocation (`build_app()`).
+3. **pip evaluates platform markers against the build machine**, so Linux dependencies are resolved from the tested venv instead.
+4. **Public Function URLs need two permissions:** `lambda:InvokeFunctionUrl` plus `lambda:InvokeFunction` limited to URL calls.
+
+Not yet: a managed database (memory uses SQLite in `/tmp`, so it resets when Lambda restarts; production would use RDS Postgres), Secrets Manager, a WAF and API gateway in front, and a reserved-concurrency cap (the account's concurrency limit is too low to set one).
+
 Connect the server to Claude Code:
 
 ```bash
@@ -81,7 +106,7 @@ Built on the MCP Python SDK 2.x (`MCPServer`, streamable HTTP, stateless) and St
 
 ## Results
 
-- `evals/security_check.py`: **14/14** against the local server (no-token and bad-token 401s, cross-client refusal, role scope refusal, scoped overdue list, PII masking, memory write permissions, deny audit).
+- `evals/security_check.py`: **13/13 against the live AWS Lambda deployment**, with the audit check confirmed in CloudWatch, and **14/14** against the local server (no-token and bad-token 401s, cross-client refusal, role scope refusal, scoped overdue list, PII masking, memory write permissions, deny audit).
 - `evals/run_evals.py`, 15 cases, run 2026-10-04 (raw results in `evals/results/`):
 
 | | Multi-agent (Sonnet 5.5 coordinator + Haiku 4.5 specialists) | Single agent (Sonnet 5.5, all 9 tools) |
