@@ -11,7 +11,7 @@ An MCP server with authentication, access control, audit logging and PII masking
 
 ## Why this exists
 
-Production Akili is a set of Python scripts and n8n workflows that the Romel Ventures team (Nairobi) uses in Slack. Its question-answering agent lived inside n8n, where it couldn't be tested, permission-scoped or cost-tracked.
+Production Akili is a set of Python scripts and n8n workflows used in Slack. Its question-answering agent lived inside n8n, where it couldn't be tested, permission-scoped or cost-tracked.
 
 This repo pulls that agent into code and puts its data behind an MCP server that enforces who sees what. It adds audit, PII masking, tracing and cost tracking, then uses evals to test whether multi-agent helps.
 
